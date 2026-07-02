@@ -42,7 +42,7 @@ The corpus is layered: a small architectural core, companions that fix the seman
 
 **Topology** — [`topologies/degree-3-graph.md`](specifications/topologies/degree-3-graph.md) describes the Degree-3 Balanced Tree (D3BT) the reference server uses to keep the graph connected and shallow: every node holds at most three symmetric slots, insertion walks toward the shallowest part of the tree, and deletion re-hangs orphaned pieces at the centroid of the largest survivor.
 
-**Overlay** — [`overlay/`](specifications/overlay/) specifies _path emergence_: how clients construct end-to-end routing above the neighbor primitive, in [stateless](specifications/overlay/path-emergence-stateless.md) (origin carries the full source route) and [stateful](specifications/overlay/path-emergence-stateful.md) (trails accumulate hop by hop) variants. This is the canonical worked example of "reach beyond the neighborhood is a client construction," not part of the server's contract.
+**Overlay** — [`overlay/`](specifications/overlay/) specifies _path emergence_: how clients construct end-to-end routing above the neighbor primitive, in [stateless](specifications/overlay/path-emergence/stateless/stateless.md) (origin carries the full source route) and [stateful](specifications/overlay/path-emergence/stateful/stateful.md) (trails accumulate hop by hop) variants. This is the canonical worked example of "reach beyond the neighborhood is a client construction," not part of the server's contract.
 
 ## The code
 

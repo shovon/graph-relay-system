@@ -25,4 +25,4 @@ Note that $m_i$ matters only to $P_i$ itself: it is $P_i$'s own attestation of w
 
 ## 3. Replay
 
-The chain proves the path was taken, not that it was taken _recently_. Inheriting the generic [caveat](../signed-hash-chain/signed-hash-chain.md#5-caveat): without freshness bound into the first link, a whole provenance chain can be replayed onto a later flood. If that matters for your flooding protocol, seed the chain with a per-flood session nonce so a chain from one flood cannot be presented as belonging to another.
+The chain proves the path was taken, not that it was taken _recently_. Inheriting the generic [caveat](../signed-hash-chain/signed-hash-chain.md#6-caveat): without freshness bound into the first link, a whole provenance chain can be replayed onto a later flood. If that matters for your flooding protocol, seed the chain with a per-flood session nonce so a chain from one flood cannot be presented as belonging to another.
