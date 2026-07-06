@@ -2,7 +2,7 @@
 
 ## Status of This Memo
 
-This document is a **transport binding**. It carries the _GRS One-Way Pushable JSON-Array Binding_ (`oneway-json-array-binding.md`) over **WebSocket** (RFC 6455), and fixes the one layer the stack above it has, until now, only named: the transport beneath the message shape (Shape §2, premise 1). Everything above — what each operation does, and what each message looks like — is already fixed by the binding and its parents; this document fixes only how those messages cross a WebSocket connection, and under what name a peer agrees to speak them.
+This document is a **transport binding**. It carries the _GRS One-Way Pushable JSON-Array Binding_ (`oneway-binding.md`) over **WebSocket** (RFC 6455), and fixes the one layer the stack above it has, until now, only named: the transport beneath the message shape (Shape §2, premise 1). Everything above — what each operation does, and what each message looks like — is already fixed by the binding and its parents; this document fixes only how those messages cross a WebSocket connection, and under what name a peer agrees to speak them.
 
 It fixes three things and no more:
 
@@ -12,7 +12,7 @@ It fixes three things and no more:
 
 It deliberately does **not** fix _which graph_ a connection joins, _how a server is addressed_, or _what a connection URL looks like_. A connection under this binding joins exactly **one graph**; how many graphs a server hosts and how each is named is the concern of a companion, the _GRS WebSocket Resource_ document (`websocket-resource.md`), and is out of scope here (Section 2). This binding is complete and correct for a server that hosts a single graph, which needs that companion not at all.
 
-It is normative for implementations claiming the GRS WebSocket Transport Binding. Section references of the form (Binding §N) point into `oneway-json-array-binding.md`; (Shape §N) into `../data-shapes/json-array-message-shape.md`; (Push §N) into `../interface-profiles/rpc-push-profile.md`; (Choreography §N) into `push-based-choreography.md`; (Core §N) into `../interface-profiles/rpc-interface.md`; (Relay §N) into `../../relay-and-neighborhood-semantics.md`; (Architecture §N) into `../../architecture.md`. The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in RFC 2119.
+It is normative for implementations claiming the GRS WebSocket Transport Binding. Section references of the form (Binding §N) point into `oneway-binding.md`; (Shape §N) into `../../../../encodings/json-array-message-shape.md`; (Push §N) into `../../interface-profiles/push/rpc-push-profile.md`; (Choreography §N) into `../push-based-choreography.md`; (Core §N) into `../../interface-profiles/rpc-interface.md`; (Relay §N) into `../../../relay-and-neighborhood-semantics.md`; (Architecture §N) into `../../../architecture.md`. The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in RFC 2119.
 
 ## Table of Contents
 
@@ -120,7 +120,7 @@ An implementation claiming this binding:
 - treats the connection as the node — opening as joining, the connection as identity and role, clean close or failed liveness check as departure (Section 5);
 - preserves, unchanged, every semantic of the JSON-array binding it carries (Binding §8) and of that binding's parents.
 
-Such an implementation realizes `oneway-json-array-binding.md` over WebSocket, and is substitutable at the semantic level for any other transport binding of the same JSON-array binding: a client and server written to the binding behave identically when its messages cross a WebSocket connection under this document.
+Such an implementation realizes `oneway-binding.md` over WebSocket, and is substitutable at the semantic level for any other transport binding of the same JSON-array binding: a client and server written to the binding behave identically when its messages cross a WebSocket connection under this document.
 
 ## 8. Security Considerations
 
@@ -142,14 +142,14 @@ This binding inherits the considerations of the JSON-array binding (Binding §9)
 - RFC 7230: Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing.
 - RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format.
 - RFC 3629: UTF-8, a transformation format of ISO 10646.
-- GRS One-Way Pushable JSON-Array Binding (`oneway-json-array-binding.md`).
-- GRS JSON-Array Message Shape (`../data-shapes/json-array-message-shape.md`).
-- GRS RPC Pushable Profile (`../interface-profiles/rpc-push-profile.md`).
-- GRS RPC Common Core (`../interface-profiles/rpc-interface.md`).
-- GRS Relay and Neighborhood Semantics (`../../relay-and-neighborhood-semantics.md`).
-- Graph Relay System (GRS) Protocol (`../../architecture.md`).
+- GRS One-Way Pushable JSON-Array Binding (`oneway-binding.md`).
+- GRS JSON-Array Message Shape (`../../../../encodings/json-array-message-shape.md`).
+- GRS RPC Pushable Profile (`../../interface-profiles/push/rpc-push-profile.md`).
+- GRS RPC Common Core (`../../interface-profiles/rpc-interface.md`).
+- GRS Relay and Neighborhood Semantics (`../../../relay-and-neighborhood-semantics.md`).
+- Graph Relay System (GRS) Protocol (`../../../architecture.md`).
 
 ### 9.2. Informative References
 
-- GRS Pushable Choreography (`push-based-choreography.md`).
+- GRS Pushable Choreography (`../push-based-choreography.md`).
 - GRS WebSocket Resource (`websocket-resource.md`), a companion fixing graph addressing — anticipated.

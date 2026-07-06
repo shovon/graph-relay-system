@@ -1,91 +1,47 @@
 # A self-certifying signed hash chain
 
-This is a hash chain of public keys with signed links — a cryptographic, append-only chain. Each party that extends the chain appends its own self-certifying identifier together with an opaque payload it commits to. The result is a tamper-evident, verifiable record of exactly which parties extended the chain, in what order, and what each one committed to — requiring no certificate authority.
+This is a hash chain of signed links — a cryptographic, append-only chain. Each party that extends the chain appends its own self-certifying identifier together with an opaque payload it commits to. The result is a tamper-evident, verifiable record of exactly which parties extended the chain, in what order, and what each one committed to — requiring no certificate authority.
 
-The chain is a primitive. It says nothing about what the payload _means_; that is the business of whatever application carries the chain. For one such application, see [path provenance in the flooding overlay](../overlay/path-provenance.md), which instantiates the payload as a forwarding edge and reads the verified chain as a proof of the path a message took.
+The chain is a primitive. It says nothing about what the payload _means_; that is the business of whatever application carries the chain.
 
-## 1. Primitives
+## 1. Two types: keys in the link, or keys omitted
 
-Each party $P_i$ holds a keypair $\big( s_i, p_i \big)$ for an asymmetric signature scheme (e.g. Ed25519). The _self-certifying ID_ is the public key itself, or some derivation thereof, so that the ID _is_ the means of checking signatures from $P_i$.
+A party's self-certifying identifier is its public key $p_i$, or some derivation thereof, so that the ID _is_ the means of checking signatures from $P_i$. There are two choices about whether that key rides in the link, and they differ enough — on the wire, and in who can verify what — to be worth specifying as two distinct chains rather than a flag on one:
+
+- **[Keys embedded in the chain](./with-embedded-keys/with-embedded-keys.md).** Every link carries $p_i$ explicitly. The verifier is handed the key and checks the signature against it. This is the default: it assumes nothing about the signature scheme beyond "you can verify a signature given a public key," so any scheme works — Ed25519 included — and every link is checkable by anyone, from the bytes alone.
+
+- **[Keys omitted from the link](./without-embedded-keys/without-embedded-keys.md).** The link carries no $p_i$ at all; a party's identity is not transmitted. This is smaller on the wire. Its integrity rests on _self-recognition_: a party confirms its own link — and, transitively, the entire prefix it signed over — using only the key it already holds, which asks nothing of the signature scheme. What it does _not_ hand you for free is third-party readability. Whether someone who is _not_ a link's signer can check or name that link turns on whether the signature scheme lets an omitted key be reconstructed from a signature alone. Some schemes do — ECDSA over secp256k1 is the canonical case (it is how Ethereum derives an address from a key that is never transmitted; see [recoverable ECDSA](../crypto/recoverable-ecdsa-signature.md)) — and some, Ed25519 among them, do not. That reconstruction is a property of the _scheme_, applied by whatever application wants a fully readable chain; the chain construction itself neither performs it nor depends on it.
+
+The two types share everything below this section — the payload's opacity, the encoding convention, the running-hash recurrence, the base case, and the freshness caveat. They differ only in whether $p_i$ rides in the link and, correspondingly, in who can verify: hand the embedded form to anyone and every link checks out, whereas the omitted form is checkable in full only by the chain's own participants — or by anyone, but only where the scheme permits reconstructing the missing keys. Because whether $p_i$ is present is part of the link's shape, the two produce different signed inputs and cannot be told apart from the bytes alone; a verifier must know, per link, which type it is decoding. The cheap and recommended stance is to fix one type for an entire chain — and, if an application genuinely needs to mix them, to signal the choice out of band, since the chain itself does not.
+
+## 2. Shared primitives
+
+Each party $P_i$ holds a keypair $(s_i, p_i)$ for an asymmetric signature scheme. Both types accept any such scheme for their own integrity; the omitted-key form can _additionally_ be read by non-participants when the scheme happens to support reconstructing a key from a signature, but it requires nothing of the scheme to let a participant verify its own link.
 
 The payload $m_i$ is an opaque, application-defined byte string that $P_i$ commits to at its link. The chain treats it as bytes and never interprets it; its meaning is fixed entirely by the application. Whatever an application needs each party to attest to — a forwarding edge, a state transition, a timestamp, a document digest — rides here.
 
-**Encoding convention.** Throughout, $\text{Sign}$, and $\text{Vrfy}$ are _variadic over the individual components_, never over a single pre-concatenated string. The arguments are combined by an unambiguous, injective encoding — length-prefixed, or otherwise self-delimiting — so that distinct argument tuples never collide on the same input. [`length-prefixed-encoding.md`](./length-prefixed-encoding.md) fixes that encoding concretely. Concretely, $H(\text{"AB"}, \text{"C"}) \ne H(\text{"A"}, \text{"BC"})$. Plain concatenation ($a \mathbin\Vert b$) does **not** qualify and must not be used: it lets an adversary slide bytes across a field boundary, yielding a different logical tuple with an identical hashed-or-signed input — defeating exactly the splicing- and reordering-resistance the chain exists to provide. (In this construction $\sigma_{i-1}$ and $p_i$ are fixed-length and only the trailing $m_i$ varies, so naive concatenation happens to be unambiguous here — but $m_i$ is the one attacker-chosen field, so relying on that coincidence rather than stating the convention is a trap.)
+**The running hash.** Both types thread an accumulator $h_i$ through the chain: a digest folding in every link so far. Each signature commits to $h_{i-1}$ — the digest of the entire prefix — which is what makes the chain append-only and reorder-resistant. The sequence number $i$ is the link's position in the chain, not a transmitted field; it is bound into both the signature and the hash so that a link cannot be lifted to a different position. The exact tuple that goes under $\text{Sign}$ and $H$ is the one thing the two types differ on, and each type's document states its own.
 
-## 2. The chain
+**Encoding convention.** Throughout, $H$, $\text{Sign}$, $\text{Vrfy}$, and $\text{Recover}$ are _variadic over the individual components_, never over a single pre-concatenated string. The arguments are combined by an unambiguous, injective encoding — length-prefixed, or otherwise self-delimiting — so that distinct argument tuples never collide on the same input. [`../encodings/length-prefixed-encoding.md`](../encodings/length-prefixed-encoding.md) fixes that encoding concretely. Concretely, $H(\text{"AB"}, \text{"C"}) \ne H(\text{"A"}, \text{"BC"})$. Plain concatenation ($a \mathbin\Vert b$) does **not** qualify and must not be used: it lets an adversary slide bytes across a field boundary, yielding a different logical tuple with an identical hashed-or-signed input — defeating exactly the splicing- and reordering-resistance the chain exists to provide. That fixes the bytes fed _to_ the primitives. How the chain is then _serialized_ to travel — the transmitted bytes, a different string from this signed input — is the carrying application's to fix, like the seed and the payload; the chain only requires that a verifier can rebuild the signed input from whatever is transmitted.
 
-At its core, we have
+## 3. The base case is out of scope
 
-$$
-L_i = (p_i, m_i), \qquad B_i=(L_i, \sigma_i)
-$$
+The recurrence bottoms out at $h_{-1}$: the seed value that $P_0$ chains its first link onto. What that seed actually _is_ — the empty string, a fixed domain-separation constant, a genesis digest, or a per-session nonce (see [§4](#4-caveat)) — is deliberately left unspecified here. The choice is not incidental: $h_{-1}$ is precisely where freshness, domain separation, and anti-replay guarantees get bound into the chain, and the right value depends on what the carrying application demands rather than on the chain construction itself. This document therefore fixes only the _shape_ of the recurrence and treats $h_{-1}$ as an opaque, externally supplied initial value; nailing it down is the job of a separate specification.
 
-Given
+Each subsequent party $P_i$ (for $i \geq 1$) receives the chain $C_{i-1} = \big( B_0, B_1, \ldots, B_{i-1} \big)$ and appends its block $B_i$, yielding
 
 $$
-\sigma_i = \text{Sign}_{s_i}(\sigma_{i - 1},E(L_i))
+C_n = \big( B_0, B_1, \ldots, B_n \big).
 $$
 
-**The base case is out of scope.** The recurrence bottoms out at $\sigma_{-1}$: the seed value that $P_0$ chains its first link onto when it computes $\sigma_0 = \text{Sign}_{s_0}(\sigma_{-1}, E(L_0))$. What that seed actually _is_ — the empty string, a fixed domain-separation constant, a genesis digest, or a per-session nonce (see [§6](#6-caveat)) — is deliberately left unspecified here. The choice is not incidental: $\sigma_{-1}$ is precisely where freshness, domain separation, and anti-replay guarantees get bound into the chain, and the right value depends on what the carrying application demands rather than on the chain construction itself. This document therefore fixes only the _shape_ of the recurrence and treats $\sigma_{-1}$ as an opaque, externally supplied initial value; nailing it down is the job of a separate specification.
+The exact shape of $B_i$ — and of the signed input that produces $\sigma_i$ — is the type's business; see [embedded keys](./with-embedded-keys/with-embedded-keys.md) or [keys omitted from the link](./without-embedded-keys/without-embedded-keys.md).
 
-Each subsequent party $P_i$ (for $i \geq 1$) receives the chain $C_{i - 1} = \big( B_0,B_1,\ldots,B_{i - 1} \big)$ and appends $B_i$, yielding
+## 4. Caveat
 
-$$
-C_n = \big( B_0,B_1,\ldots,B_n \big)
-$$
-
-## 3. Verification
-
-A verifier reconstructs each signed input from scratch and checks every link:
-
-$$
-\forall i : \quad \text{Vrfy}_{p_i}((\sigma_{i-1}, E(L_i)), \sigma_i) \overset{?}{=} 1
-$$
-
-If all checks pass, you have proof that each $P_i$, in order, committed to payload $m_i$ atop the entire chain that preceded it. The verified object is the ordered sequence of $(P_i, m_i)$ commitments — no more, no less. Any reading beyond that (this is a path, this is a ledger) is the application's to impose.
-
-## 4. Alternative: omitting the public key when it is recoverable
-
-The base construction carries $p_i$ explicitly inside every link. That is the right default, because it makes no assumption about the signature scheme beyond "you can verify a signature given a public key." But some schemes give you more than that: from the signature and the signed message alone, a verifier can _recover_ the public key that produced it. ECDSA with public-key recovery is the canonical example — it is how, for instance, secp256k1 signatures are handled on Ethereum, where addresses are derived from a key that is never transmitted, only recovered. For any such scheme, transmitting $p_i$ and committing to it is redundant work: the verifier already holds everything it needs to reconstruct the key. This section defines the variant that drops it.
-
-The link and its signature become
-
-$$
-L_i = (m_i), \qquad B_i = (L_i, \sigma_i),
-$$
-
-with the recurrence unchanged in shape,
-
-$$
-\sigma_i = \text{Sign}_{s_i}(\sigma_{i - 1}, E(L_i)),
-$$
-
-except that $E(L_i)$ now encodes only the payload $m_i$ — the public key is nowhere in the signed input. Verification correspondingly recovers the key instead of being handed it:
-
-$$
-\forall i : \quad p_i = \text{Recover}\big(\sigma_i, (\sigma_{i-1}, E(L_i))\big),
-$$
-
-and the self-certifying ID of $P_i$ is the same derivation of $p_i$ as before — only now applied to the recovered key rather than a transmitted one. Everything downstream of "obtain $p_i$" is identical to [§3](#3-verification): the ordering and append-only guarantees come from $\sigma_{i-1}$ riding inside each signature exactly as in the base scheme, and they are untouched by where $p_i$ comes from.
-
-**This is not merely an optimization; for a recovery-based verifier it is forced.** Look at the circularity the base scheme would otherwise impose. There, a verifier needs $p_i$ in hand to rebuild $E(L_i)$ before it can check the link. If $p_i$ is instead to be _recovered from_ the signature over that very message, then the message must not itself depend on $p_i$ — otherwise you would need the answer before you could pose the question. Omitting $p_i$ from $L_i$ is precisely what breaks that circle. So "recover the key" and "leave the key out of the payload" are not two independent choices you happen to make together; the first requires the second. This is why the variant is defined as its own scheme rather than offered as a flag on the base one.
-
-**What you keep.** The property that matters most survives intact, and arguably sharpens. The recovered key _is_ the identity: $P_i$ is defined as whoever holds the key that this signature recovers to, with nothing transmitted alongside to corroborate or contradict it. That is self-certification in its most literal form — there is no separate "claimed ID" field that a verifier must check against the signature, because the ID is a pure function of the signature and the prefix it commits to.
-
-**What it costs.**
-
-- **A recovery-capable scheme is a hard prerequisite.** Ed25519 as standardly specified offers no public-key recovery; you cannot use this variant with it, and should keep $p_i$ in the payload per the base scheme. The variant is only available where a $\text{Recover}$ operation genuinely exists.
-- **Signature malleability becomes an identity concern.** Some recoverable schemes are malleable — for ECDSA, $(r, s)$ and $(r, n - s)$ are both valid, and in general they recover _different_ keys, hence present as _different_ parties. Within the chain this is self-limiting: $\sigma_i$ is bound into $\sigma_{i+1}$, so tampering with a non-final link's signature invalidates the link that follows it. But an application that indexes, deduplicates, or otherwise keys links by their signature — or that treats the terminal link specially, since nothing chains over it — should pin down a canonical form (e.g. the low-$s$ normalization) so that a link maps to exactly one recovered identity.
-- **Identity is known only _after_ checking.** There is no way to pre-filter "is this link from the party I expected?" without first recovering the key. This is no worse than the base scheme, which is already self-certifying rather than identity-directed, but it is worth stating: the variant does not give you an addressable ID up front.
-
-**Mixing the two.** Whether $p_i$ is present is part of the link's shape, so a verifier must know, per link, which form it is decoding — the two produce different $E(L_i)$ and cannot be told apart from the bytes alone. The cheap and recommended stance is to fix one form for an entire chain. If an application genuinely needs to mix schemes across parties (some recover, some do not), the choice must be signaled out of band or in an application-level framing that the chain does not define; the chain itself only fixes the recurrence, and both forms instantiate the same recurrence.
+This proves ordering and integrity, not freshness. Without a nonce or timestamp bound into the first link, a chain can be replayed wholesale. If replay matters to your application, fold a session nonce into the chain's seed — i.e., derive $h_{-1}$ from it instead of starting from a bare constant.
 
 ## 5. Notes on design
 
-- **"Only the party that wrote $m_i$ needs to interpret it."** Correct, and it falls out naturally: $m_i$ is signed by $P_i$ alone. $P_{i + 1}$ does not need to understand it; from every other party's perspective it is an opaque commitment, simply carried along.
-- **Self-certifying.** Because the ID is based on $p_i$, anyone can verify a link against its claimed ID without external trust. This is the Mazières/SFS sense of "self-certifying."
-- **Append-only integrity.** Chaining via $\sigma_{i-1}$ inside each signature is what stops a malicious intermediate party from rewriting history, or an intermediary from reordering links. Each signature is a commitment to the _entire prefix_.
-
-## 6. Caveat
-
-This proves ordering and integrity, not freshness. Without a nonce or timestamp bound into the first link, a chain can be replayed wholesale. If replay matters to your application, fold a session nonce into the chain's seed — i.e., seed $\sigma_0$'s input with it instead of starting from the bare payload.
+- **"Only the party that wrote $m_i$ needs to interpret it."** Correct, and it falls out naturally: $m_i$ is signed by $P_i$ alone. $P_{i+1}$ does not need to understand it; from every other party's perspective it is an opaque commitment, simply carried along.
+- **Self-certifying.** Because the ID is based on $p_i$, a link can be checked against its ID without external trust. This is the Mazières/SFS sense of "self-certifying." The two types realize it differently — the embedded form hands every verifier the key to check against; the omitted form leaves a participant to check against the key it already holds, and a non-participant to reconstruct one only where the scheme allows — but both make the ID a function of the signature rather than an external attestation.
+- **Append-only integrity.** Chaining via $h_{i-1}$ inside each signature is what stops a malicious intermediate party from rewriting history, or an intermediary from reordering links. Because $h_{i-1}$ is a running digest of everything before it, each signature is a commitment to the _entire prefix_.

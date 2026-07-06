@@ -2,11 +2,11 @@
 
 ## Status of This Memo
 
-This document is a **binding**. It crystallizes the abstract operations of the _GRS RPC One-Way Pushable Derivative_ (`../interface-profiles/rpc-push-oneway.md`) into the concrete message form fixed by the _GRS JSON-Array Message Shape_ (`../data-shapes/json-array-message-shape.md`). It is the meeting point of the two: it takes _what each operation does_ from the former and _what a message looks like_ from the latter, and fixes the one thing neither supplies alone — the concrete wire message for each operation.
+This document is a **binding**. It crystallizes the abstract operations of the _GRS RPC One-Way Pushable Derivative_ (`../../interface-profiles/push/rpc-push-oneway.md`) into the concrete message form fixed by the _GRS JSON-Array Message Shape_ (`../../../../encodings/json-array-message-shape.md`). It is the meeting point of the two: it takes _what each operation does_ from the former and _what a message looks like_ from the latter, and fixes the one thing neither supplies alone — the concrete wire message for each operation.
 
 This is precisely the latitude the layering reserves for a binding. The Common Core grants it: an operation's name and the order in which its inputs are listed are abstract, and "a binding … fixes the concrete selector for each operation and the concrete layout of its inputs" (Core §5). The shape defers to it: "the operation each [selector] denotes [is] fixed by a binding outside this shape" (Shape §3.2). The derivative leaves the form open while fixing the behavior: every operation is one-way, with no response and no correlation (OneWay §2, §4). This binding occupies exactly that gap and adds nothing to the semantics.
 
-It is normative for implementations claiming the GRS One-Way Pushable JSON-Array Binding. It depends on, without restating, everything fixed by the derivative, the shape, and the representation bindings for the carried types. Section references of the form (OneWay §N) point into `../interface-profiles/rpc-push-oneway.md`; (Shape §N) into `../data-shapes/json-array-message-shape.md`; (Push §N) into `../interface-profiles/rpc-push-profile.md`; (Core §N) into `../interface-profiles/rpc-interface.md`; (Designator §N) into `../data-shapes/designator-string.md`; (Payload §N) into `../data-shapes/payload-string.md`; (Relay §N) and (Architecture §N) into the respective companions. The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in RFC 2119.
+It is normative for implementations claiming the GRS One-Way Pushable JSON-Array Binding. It depends on, without restating, everything fixed by the derivative, the shape, and the representation bindings for the carried types. Section references of the form (OneWay §N) point into `../../interface-profiles/push/rpc-push-oneway.md`; (Shape §N) into `../../../../encodings/json-array-message-shape.md`; (Push §N) into `../../interface-profiles/push/rpc-push-profile.md`; (Core §N) into `../../interface-profiles/rpc-interface.md`; (Designator §N) into `../../data-shapes/designator-string.md`; (Payload §N) into `../../data-shapes/payload-string.md`; (Relay §N) and (Architecture §N) into the respective companions. The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in RFC 2119.
 
 ## Table of Contents
 
@@ -31,7 +31,7 @@ The derivative fixes an operation set and its behavior; the shape fixes that a m
 
 1. **A selector for each operation** (Section 5). Each operation's selector is its abstract name **verbatim**, as a string in the shape's string selector space (Shape §3.2): `"Send"`, `"Deliver"`, `"NeighborhoodUpdate"`. The binding is free to choose the token independently of the abstract spelling (Core §5); it chooses to mirror it, so that a message's selector names its operation on sight.
 2. **The positional layout of each operation's inputs** (Section 4). Each abstract input becomes a positional argument; where an operation lists more than one, this binding places them in the order the derivative lists them — again a faithful choice the binding is free to make (Core §5), made for traceability.
-3. **The representation of each carried type** (Section 3). `Designator` and `Payload` already have representation bindings, which this binding adopts; `NeighborhoodState` is fixed here as a JSON array of designators, the form `../data-shapes/designator-string.md` §6 anticipates.
+3. **The representation of each carried type** (Section 3). `Designator` and `Payload` already have representation bindings, which this binding adopts; `NeighborhoodState` is fixed here as a JSON array of designators, the form `../../data-shapes/designator-string.md` §6 anticipates.
 
 It adds **nothing** to the semantics. One-way operation, the absence of any response, the absence of correlation, best-effort relay, no-misdelivery, and resolution against the current neighborhood are inherited unchanged from the derivative and its parents (OneWay §3, §4; Relay §3, §4, §6). This binding is the union of the derivative's behavior and the shape's form, plus the selector-and-position assignment that is a binding's own job — and no more.
 
@@ -39,15 +39,15 @@ It adds **nothing** to the semantics. One-way operation, the absence of any resp
 
 ### 3.1. Designator
 
-A `Designator` is represented as a **JSON string** (RFC 8259), per `../data-shapes/designator-string.md` and as that binding's §6 directs for a JSON encoding. Equality is exact code-point equality of the decoded string (Designator §2); a server resolves a `Send` designator against the sending node's current neighborhood by that equality (Designator §5). This binding ascribes the string no structure and a client MUST NOT either (Designator §3).
+A `Designator` is represented as a **JSON string** (RFC 8259), per `../../data-shapes/designator-string.md` and as that binding's §6 directs for a JSON encoding. Equality is exact code-point equality of the decoded string (Designator §2); a server resolves a `Send` designator against the sending node's current neighborhood by that equality (Designator §5). This binding ascribes the string no structure and a client MUST NOT either (Designator §3).
 
 ### 3.2. Payload
 
-A `Payload` is represented as a **JSON string** (RFC 8259), per `../data-shapes/payload-string.md`. It is the shape's opaque argument (Shape §3.4): neither the binding nor the server inspects, parses, or transforms it; it is relayed and recovered verbatim, code point for code point (Payload §3, §4). An application carrying data that is not naturally a string encodes it into the string (for example, base64) above this binding, which remains unaware it has done so (Payload §2).
+A `Payload` is represented as a **JSON string** (RFC 8259), per `../../data-shapes/payload-string.md`. It is the shape's opaque argument (Shape §3.4): neither the binding nor the server inspects, parses, or transforms it; it is relayed and recovered verbatim, code point for code point (Payload §3, §4). An application carrying data that is not naturally a string encodes it into the string (for example, base64) above this binding, which remains unaware it has done so (Payload §2).
 
 ### 3.3. NeighborhoodState
 
-A `NeighborhoodState` is represented as a **JSON array** whose elements are the designator strings (Section 3.1) of the node's current out-neighbors — the form `../data-shapes/designator-string.md` §6 anticipates ("a `NeighborhoodState` exposes each out-neighbor's designator as such"). It is fixed here as follows:
+A `NeighborhoodState` is represented as a **JSON array** whose elements are the designator strings (Section 3.1) of the node's current out-neighbors — the form `../../data-shapes/designator-string.md` §6 anticipates ("a `NeighborhoodState` exposes each out-neighbor's designator as such"). It is fixed here as follows:
 
 - Each element is a `Designator` (Section 3.1); the array carries one element per current out-neighbor.
 - No element appears twice: per-state distinctness (Designator §4) guarantees a node's current out-neighbors bear pairwise-distinct designator strings, so the array holds no duplicate strings.
@@ -136,7 +136,7 @@ This binding is conformant to each document it joins, and substitutable at the s
 - **To the shape.** Every message is a well-formed shape message — a JSON array with a valid selector and positional arguments (Shape §3, §5). It introduces no correlation field (Shape §4), commits to a single selector space as the shape recommends (Shape §3.2), and follows append-only evolution (Shape §6).
 - **To the Common Core.** It exercises exactly the latitude Core §5 grants a binding — fixing the wire selector and the argument positions, and choosing them (here, faithfully) independently of the abstract names and listing order — while preserving the §4 semantics in full.
 
-An implementation claiming this binding implements `../interface-profiles/rpc-push-oneway.md` carried in `../data-shapes/json-array-message-shape.md`, and any client or server written to the abstract derivative behaves identically when its messages take this form.
+An implementation claiming this binding implements `../../interface-profiles/push/rpc-push-oneway.md` carried in `../../../../encodings/json-array-message-shape.md`, and any client or server written to the abstract derivative behaves identically when its messages take this form.
 
 ## 9. Security Considerations
 
@@ -154,11 +154,11 @@ This binding inherits the considerations of the derivative (OneWay §9), the sha
 
 - RFC 2119: Key words for use in RFCs to Indicate Requirement Levels.
 - RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format.
-- GRS RPC One-Way Pushable Derivative (`../interface-profiles/rpc-push-oneway.md`).
-- GRS JSON-Array Message Shape (`../data-shapes/json-array-message-shape.md`).
-- GRS RPC Pushable Profile (`../interface-profiles/rpc-push-profile.md`).
-- GRS RPC Common Core (`../interface-profiles/rpc-interface.md`).
-- GRS Designator String Representation (`../data-shapes/designator-string.md`).
-- GRS Payload String Representation (`../data-shapes/payload-string.md`).
-- GRS Relay and Neighborhood Semantics (`../../relay-and-neighborhood-semantics.md`).
-- Graph Relay System (GRS) Protocol (`../../architecture.md`).
+- GRS RPC One-Way Pushable Derivative (`../../interface-profiles/push/rpc-push-oneway.md`).
+- GRS JSON-Array Message Shape (`../../../../encodings/json-array-message-shape.md`).
+- GRS RPC Pushable Profile (`../../interface-profiles/push/rpc-push-profile.md`).
+- GRS RPC Common Core (`../../interface-profiles/rpc-interface.md`).
+- GRS Designator String Representation (`../../data-shapes/designator-string.md`).
+- GRS Payload String Representation (`../../data-shapes/payload-string.md`).
+- GRS Relay and Neighborhood Semantics (`../../../relay-and-neighborhood-semantics.md`).
+- Graph Relay System (GRS) Protocol (`../../../architecture.md`).

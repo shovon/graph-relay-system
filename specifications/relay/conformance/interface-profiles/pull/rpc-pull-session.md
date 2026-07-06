@@ -4,9 +4,9 @@
 
 This document specifies **one mechanism** for a **session** over a request/response, client-initiated-only transport (HTTP is the archetype): it synthesizes the thing such a transport lacks natively but a persistent connection supplies for free — a session with a definite beginning, a carried identity, a liveness notion, and a definite end. The _GRS RPC Pull Profile_ (`rpc-pull-profile.md`) requires such a session but does not mandate this mechanism; this document is one conforming realization the profile MAY be paired with, not a layer it depends on by name.
 
-It plays, for a connectionless transport, the role a connection plays for the Pushable Profile (`rpc-push-profile.md`). The relationship is the one TCP has to an application: TCP establishes, identifies, keeps alive, and tears down a connection, and the application rides on top without re-implementing any of it. This mechanism plays TCP's role where the transport itself will not.
+It plays, for a connectionless transport, the role a connection plays for the Pushable Profile (`../push/rpc-push-profile.md`). The relationship is the one TCP has to an application: TCP establishes, identifies, keeps alive, and tears down a connection, and the application rides on top without re-implementing any of it. This mechanism plays TCP's role where the transport itself will not.
 
-This document is deliberately **GRS-agnostic**. It knows nothing of nodes, neighborhoods, designators, the relay, or any other concept from `../../architecture.md`, `../../relay-and-neighborhood-semantics.md`, or the RPC Common Core (`rpc-interface.md`). It carries opaque requests and exposes session lifecycle; the meaning poured into those requests, and the binding of a session's life to a node's life, belong entirely to the Pull Profile above it. An implementation MAY satisfy the Pull Profile's session requirement with any other mechanism providing the same abstraction (a transport-native session, a cookie-based session, etc.); this document specifies one conforming mechanism.
+This document is deliberately **GRS-agnostic**. It knows nothing of nodes, neighborhoods, designators, the relay, or any other concept from `../../../architecture.md`, `../../../relay-and-neighborhood-semantics.md`, or the RPC Common Core (`../rpc-interface.md`). It carries opaque requests and exposes session lifecycle; the meaning poured into those requests, and the binding of a session's life to a node's life, belong entirely to the Pull Profile above it. An implementation MAY satisfy the Pull Profile's session requirement with any other mechanism providing the same abstraction (a transport-native session, a cookie-based session, etc.); this document specifies one conforming mechanism.
 
 ## Table of Contents
 
@@ -98,4 +98,4 @@ How a client authenticates at `Establish`, if at all, is deployment-defined and 
 ### 7.2. Informative References
 
 - GRS RPC Pull Profile (`rpc-pull-profile.md`): the upper layer this session layer is specified to serve.
-- GRS RPC Common Core (`rpc-interface.md`): defines the session-and-node-lifecycle responsibility (Core §4.4) this layer helps the Pull Profile satisfy.
+- GRS RPC Common Core (`../rpc-interface.md`): defines the session-and-node-lifecycle responsibility (Core §4.4) this layer helps the Pull Profile satisfy.

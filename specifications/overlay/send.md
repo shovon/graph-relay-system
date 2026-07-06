@@ -1,0 +1,24 @@
+# Delivery: The `send` RPC
+
+The [interface profile](./interface-profile.md) fixes the envelope and the rule that each RPC in it is judged on its own terms. This memo defines the RPC that carries cargo. It is the overlay's one delivery primitive — both path-emergence disciplines carry cargo with it — and, in this revision, it is also the RPC that *discovers*. A send that does not yet know its whole route floods to find the rest, building the route as it travels. There is no separate discovery RPC; discovery is a send whose route is not yet complete.
+
+**`send(trail, pos, payload)`** — carry `payload` toward the target named in `trail`. The `trail` is the [signed hash chain](../signed-hash-chain/signed-hash-chain.md): a preamble fixing the **`targetID`** the delivery is aimed at (and the per-flood discovery ID `D`), followed by zero or more hop **blocks**, each a node's committed `(out-edge, signature)`. `pos` is a pointer into those blocks. One relationship — `pos` against the number of blocks — decides both *how the packet is addressed* and *how far it fans out*:
+
+- **`pos` is inside the blocks — follow.** The route is known this far. The node reads the entry at `pos` — its own `(node ID, out-designator)` — confirms the entry names it, forwards along that one out-designator, and re-emits with `pos` advanced by one. Source-routed, unicast.
+- **`pos` has reached the end of the blocks — frontier.** The route runs out at this node, so it asks the question `targetID` poses:
+  - if it **is** the target, the send has arrived — it delivers `payload` up, and, when a route was being discovered, [`return`s](./return-binding.md) the assembled trail so the origin can cache it. Only the target ends a discovery: a signed chain cannot be spliced, so no intermediate can hand back a route it did not itself traverse;
+  - otherwise it is the growing edge of a flood — it appends its own `(out-edge, signature)` block and re-emits onward, `pos` advanced so each copy sits at the new frontier. *How wide* it re-emits is a local choice: by default to *every* out-neighbor, but a node that recognizes one out-neighbor as lying on a known way to `targetID` MAY re-emit on that edge alone — still appending its block — betting on the recognition to skip the flood and risking a dead end if the guess has gone stale. It is an optimization, never a shortcut: the block is appended and the chain grows one real hop either way; recognition narrows only *where* the copy travels, never *what* the chain records.
+
+*An unfinished trail signals flood forward.* A source route exhausted at a node that is not the target is a route still under construction, so the node extends it and floods on. How completeness is judged and how "follow" and "extend" are realized in bytes is the discipline's to fix — the stateless profile reads `pos` against the block count exactly as above; a stateful profile MAY consult installed forwarding state instead. This contract fixes only that a send carries a route which may be whole or partial, and that a partial one is completed by flooding.
+
+## The old cases are degenerate trails
+
+One rule, keyed on `pos` versus the block count, subsumes everything the earlier `target | trail` split expressed — because a bare target is nothing but a trail with no blocks yet:
+
+- **A complete route** — an *n*-block trail, `pos` at the start — is followed hop by hop, and `pos` reaches the end *exactly at the target*, which recognizes itself and delivers. No flood ever fires.
+- **First contact** — a **zero-block** trail (preamble only), a payload present — is at the frontier from its very first node, the origin, which floods the payload while the trail grows behind it. The old destination-addressed `send(target, payload)` is exactly this, with the target now sitting in the preamble where the chain's seed already put it.
+- **Pure discovery** — the same zero-block trail with an **empty payload** — floods and builds a route while delivering nothing; the answering node `return`s the assembled route. This is what used to be a distinct `build` RPC. It is now a send that happens to carry no cargo, and there is no `build` selector.
+
+## The payload is opaque, and unauthenticated by default
+
+The overlay does not read `payload`; it hands it up at the target untouched. What the trail authenticates is the *route* — each block is a signature over an out-edge, and the first block recovers to the origin — so a recipient learns the route's origin by [recovery](./path-emergence/recovered-node-identity.md), not that the origin authored the bytes: an intermediate could alter the payload and the trail would not notice. Payload authorship is a *separate* signature, defined by the optional [authenticated-delivery profile](./authenticated-delivery.md), and deliberately kept out of the trail so that the route stays reusable across many payloads — a trail welded to one payload could never be cached and reused for the next.

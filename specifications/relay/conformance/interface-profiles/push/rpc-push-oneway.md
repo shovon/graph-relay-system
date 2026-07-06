@@ -6,7 +6,7 @@ This document is a **derivative** of the _GRS RPC Pushable Profile_ (`rpc-push-p
 
 This document constrains only the **call shape** of the interface — the axis Core §5 leaves to a binding ("request/response versus one-way, and correlation of responses"). It says nothing about the transport beneath, and nothing about delivery quality: ordering, reliability, buffering, retention, and deduplication remain exactly as the Pushable Profile and any transport binding under it leave them (Relay §7). The property fixed here is a property of the interface, not of any transport that carries it.
 
-It is normative for implementations claiming the GRS One-Way Pushable Derivative. It depends on, without restating, everything fixed by the Pushable Profile and the Common Core. Section references of the form (Push §N) point into `rpc-push-profile.md`; (Core §N) into `rpc-interface.md`; (Relay §N) into `../../relay-and-neighborhood-semantics.md`; (Architecture §N) into `../../architecture.md`.
+It is normative for implementations claiming the GRS One-Way Pushable Derivative. It depends on, without restating, everything fixed by the Pushable Profile and the Common Core. Section references of the form (Push §N) point into `rpc-push-profile.md`; (Core §N) into `../rpc-interface.md`; (Relay §N) into `../../../relay-and-neighborhood-semantics.md`; (Architecture §N) into `../../../architecture.md`.
 
 ## Table of Contents
 
@@ -103,6 +103,6 @@ This derivative inherits the considerations of the Pushable Profile (Push §7), 
 
 - RFC 2119: Key words for use in RFCs to Indicate Requirement Levels.
 - GRS RPC Pushable Profile (`rpc-push-profile.md`).
-- GRS RPC Common Core (`rpc-interface.md`).
-- Graph Relay System (GRS) Protocol (`../../architecture.md`).
-- GRS Relay and Neighborhood Semantics (`../../relay-and-neighborhood-semantics.md`).
+- GRS RPC Common Core (`../rpc-interface.md`).
+- Graph Relay System (GRS) Protocol (`../../../architecture.md`).
+- GRS Relay and Neighborhood Semantics (`../../../relay-and-neighborhood-semantics.md`).

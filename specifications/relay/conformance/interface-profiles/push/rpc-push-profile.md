@@ -2,9 +2,9 @@
 
 ## Status of This Memo
 
-This document is a profile of the _GRS RPC Common Core_ (`rpc-interface.md`) for **full-duplex, session-oriented transports** — environments in which the server can send a message to a client at any time, not only in response to a request, and in which a persistent connection underlies the session. WebSocket and raw TCP are the archetypes.
+This document is a profile of the _GRS RPC Common Core_ (`../rpc-interface.md`) for **full-duplex, session-oriented transports** — environments in which the server can send a message to a client at any time, not only in response to a request, and in which a persistent connection underlies the session. WebSocket and raw TCP are the archetypes.
 
-It specializes the two responsibilities the core defers (Core §4.3, §4.4) in the direct way such a transport allows: the receiving half of the relay is a genuine server push, and a node's lifetime is the connection's lifetime. This makes it the lighter of the two profiles — the architecture's "node existence is coterminous with the session" (Architecture §3) holds literally here, so no establishment or teardown procedure is needed. It is normative for implementations claiming the GRS Pushable Profile, and depends on, without restating, the abstract data and the `Send` semantics of the core; it is here that the core's neighborhood-state-availability responsibility (Core §4.2) is fixed, primarily by push. Section references (Core §N) point into `rpc-interface.md`; (Architecture §N) and (Relay §N) into the respective companions.
+It specializes the two responsibilities the core defers (Core §4.3, §4.4) in the direct way such a transport allows: the receiving half of the relay is a genuine server push, and a node's lifetime is the connection's lifetime. This makes it the lighter of the two profiles — the architecture's "node existence is coterminous with the session" (Architecture §3) holds literally here, so no establishment or teardown procedure is needed. It is normative for implementations claiming the GRS Pushable Profile, and depends on, without restating, the abstract data and the `Send` semantics of the core; it is here that the core's neighborhood-state-availability responsibility (Core §4.2) is fixed, primarily by push. Section references (Core §N) point into `../rpc-interface.md`; (Architecture §N) and (Relay §N) into the respective companions.
 
 ## Table of Contents
 
@@ -86,10 +86,10 @@ This profile inherits Core §6 and Architecture §8, and adds little of its own 
 ### 8.1. Normative References
 
 - RFC 2119: Key words for use in RFCs to Indicate Requirement Levels.
-- GRS RPC Common Core (`rpc-interface.md`).
-- Graph Relay System (GRS) Protocol (`../../architecture.md`).
-- GRS Relay and Neighborhood Semantics (`../../relay-and-neighborhood-semantics.md`).
+- GRS RPC Common Core (`../rpc-interface.md`).
+- Graph Relay System (GRS) Protocol (`../../../architecture.md`).
+- GRS Relay and Neighborhood Semantics (`../../../relay-and-neighborhood-semantics.md`).
 
 ### 8.2. Informative References
 
-- GRS RPC Pull Profile (`rpc-pull-profile.md`): the companion profile for request/response transports.
+- GRS RPC Pull Profile (`../pull/rpc-pull-profile.md`): the companion profile for request/response transports.

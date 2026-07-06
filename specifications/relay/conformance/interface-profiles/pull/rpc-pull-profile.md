@@ -2,11 +2,11 @@
 
 ## Status of This Memo
 
-This document is a profile of the _GRS RPC Common Core_ (`rpc-interface.md`) for **request/response, client-initiated-only transports** — environments in which the server cannot send a message to a client except as the response to a request the client made. Plain HTTP is the archetype.
+This document is a profile of the _GRS RPC Common Core_ (`../rpc-interface.md`) for **request/response, client-initiated-only transports** — environments in which the server cannot send a message to a client except as the response to a request the client made. Plain HTTP is the archetype.
 
-It **assumes a session** beneath it — an association with a definite beginning, a carried identity, a liveness notion, and a definite end — over the connectionless transport that does not provide one natively. How that session is supplied is out of scope here and is the implementer's responsibility, exactly as the _GRS RPC Pushable Profile_ (`rpc-push-profile.md`) assumes a full-duplex connection without specifying WebSocket or TCP; `rpc-pull-session.md` is one example realization (Section 3). With a session assumed, this profile is structurally parallel to the Pushable Profile: both treat a session as a node and define only the GRS operations carried within it. The single way this profile remains heavier is the receiving half of the relay — because even with a session the server still cannot push, that half stays a client poll (Section 5).
+It **assumes a session** beneath it — an association with a definite beginning, a carried identity, a liveness notion, and a definite end — over the connectionless transport that does not provide one natively. How that session is supplied is out of scope here and is the implementer's responsibility, exactly as the _GRS RPC Pushable Profile_ (`../push/rpc-push-profile.md`) assumes a full-duplex connection without specifying WebSocket or TCP; `rpc-pull-session.md` is one example realization (Section 3). With a session assumed, this profile is structurally parallel to the Pushable Profile: both treat a session as a node and define only the GRS operations carried within it. The single way this profile remains heavier is the receiving half of the relay — because even with a session the server still cannot push, that half stays a client poll (Section 5).
 
-This profile is normative for implementations claiming the GRS Pull Profile. It depends on, and does not restate, the abstract data and the `Send` semantics of the core; it is here that the core's session-and-node-lifecycle responsibility (Core §4.4) is fixed — by binding the node to an assumed session (Section 3) — and the core's neighborhood-state-availability responsibility (Core §4.2) is fixed, as a pull query. Section references (Core §N) point into `rpc-interface.md`, and (Architecture §N) / (Relay §N) into the respective companions.
+This profile is normative for implementations claiming the GRS Pull Profile. It depends on, and does not restate, the abstract data and the `Send` semantics of the core; it is here that the core's session-and-node-lifecycle responsibility (Core §4.4) is fixed — by binding the node to an assumed session (Section 3) — and the core's neighborhood-state-availability responsibility (Core §4.2) is fixed, as a pull query. Section references (Core §N) point into `../rpc-interface.md`, and (Architecture §N) / (Relay §N) into the respective companions.
 
 ## Table of Contents
 
@@ -89,7 +89,7 @@ The inbox is the server-held buffer that stands in for a push channel. Its contr
 
 This profile has no neighborhood-change push. A client learns its current out-neighbors only by calling `GetNeighborhood` (Section 4.1), and learns of a _change_ only by calling it again. The recency of a client's view is therefore bounded by its own poll cadence (Relay §5). Whatever a client does between polls, the relay stays safe: a `Send` whose designator does not denote a current out-neighbor is discarded, never misdelivered (Relay §3, §4).
 
-Push-based neighborhood notification is intentionally absent here; it is a feature of the companion Pushable Profile (`rpc-push-profile.md`), which the underlying transport makes possible there and not here.
+Push-based neighborhood notification is intentionally absent here; it is a feature of the companion Pushable Profile (`../push/rpc-push-profile.md`), which the underlying transport makes possible there and not here.
 
 ## 7. Security Considerations
 
@@ -105,11 +105,11 @@ This profile inherits Core §6 and Architecture §8. Any credential the session 
 ### 8.1. Normative References
 
 - RFC 2119: Key words for use in RFCs to Indicate Requirement Levels.
-- GRS RPC Common Core (`rpc-interface.md`).
-- Graph Relay System (GRS) Protocol (`../../architecture.md`).
-- GRS Relay and Neighborhood Semantics (`../../relay-and-neighborhood-semantics.md`).
+- GRS RPC Common Core (`../rpc-interface.md`).
+- Graph Relay System (GRS) Protocol (`../../../architecture.md`).
+- GRS Relay and Neighborhood Semantics (`../../../relay-and-neighborhood-semantics.md`).
 
 ### 8.2. Informative References
 
 - GRS RPC Pull Session Layer (`rpc-pull-session.md`): one example mechanism for supplying the session this profile assumes; any mechanism providing the same abstraction conforms.
-- GRS RPC Pushable Profile (`rpc-push-profile.md`): the companion profile for full-duplex transports.
+- GRS RPC Pushable Profile (`../push/rpc-push-profile.md`): the companion profile for full-duplex transports.

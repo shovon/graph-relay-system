@@ -6,8 +6,8 @@ This document is a companion specification to the _Graph Relay System (GRS) Prot
 
 It deliberately does **not** fix how server-originated events reach a client, nor how a node is established and its departure detected. Those depend on whether the transport can carry server-initiated messages, and they are fixed by one of two companion **profiles**, exactly one of which an implementation adopts:
 
-- **GRS RPC Pull Profile** (`rpc-pull-profile.md`) — for request/response, client-initiated-only transports (e.g. HTTP), where the server cannot push and a session must be synthesized from independent requests.
-- **GRS RPC Pushable Profile** (`rpc-push-profile.md`) — for full-duplex, session-oriented transports (e.g. WebSocket, raw TCP), where the server can push and a connection _is_ the session.
+- **GRS RPC Pull Profile** (`pull/rpc-pull-profile.md`) — for request/response, client-initiated-only transports (e.g. HTTP), where the server cannot push and a session must be synthesized from independent requests.
+- **GRS RPC Pushable Profile** (`push/rpc-push-profile.md`) — for full-duplex, session-oriented transports (e.g. WebSocket, raw TCP), where the server can push and a connection _is_ the session.
 
 This document is normative for both profiles. Where the two profiles differ, this core states the _responsibility_ and defers the _mechanism_ to the profile; a profile MUST fix each such mechanism concretely (it is not left open within a profile). Section references of the form (Architecture §N) point into `../../architecture.md`; (Relay §N) into `../../relay-and-neighborhood-semantics.md`.
 
@@ -75,8 +75,8 @@ A client can address `Send` (Section 4.1) only by designating a current out-neig
 
 How that state reaches the client depends on whether the transport can carry server-originated messages, and each profile MUST fix one mechanism:
 
-- In a **pull** transport, the client obtains the state on demand by querying (`GetNeighborhood`, defined by `rpc-pull-profile.md`); the recency of its view is bounded by its own query cadence, and re-querying is the only way it observes a change.
-- In a **pushable** transport, the server pushes the updated state to the affected node whenever it changes (`NeighborhoodUpdate`, defined by `rpc-push-profile.md`), and MAY additionally answer an on-demand query for explicit re-sync.
+- In a **pull** transport, the client obtains the state on demand by querying (`GetNeighborhood`, defined by `pull/rpc-pull-profile.md`); the recency of its view is bounded by its own query cadence, and re-querying is the only way it observes a change.
+- In a **pushable** transport, the server pushes the updated state to the affected node whenever it changes (`NeighborhoodUpdate`, defined by `push/rpc-push-profile.md`), and MAY additionally answer an on-demand query for explicit re-sync.
 
 The ordering and versioning of successive neighborhood states remains out of scope (Section 3).
 
@@ -84,8 +84,8 @@ The ordering and versioning of successive neighborhood states remains out of sco
 
 `Send` (Section 4.1) has no observable effect unless the destination node can obtain the payloads relayed to it by its in-neighbors. The server therefore MUST provide a receiving half, and every profile MUST fix exactly one mechanism for it:
 
-- In a **pushable** transport, the server delivers each relayed payload to the destination node as a server-originated event (`Deliver`, defined by `rpc-push-profile.md`).
-- In a **pull** transport, the server buffers relayed payloads for the node and the client drains them by polling (`Receive`, defined by `rpc-pull-profile.md`).
+- In a **pushable** transport, the server delivers each relayed payload to the destination node as a server-originated event (`Deliver`, defined by `push/rpc-push-profile.md`).
+- In a **pull** transport, the server buffers relayed payloads for the node and the client drains them by polling (`Receive`, defined by `pull/rpc-pull-profile.md`).
 
 Whichever mechanism a profile fixes, it MUST honor the same invariants this core and the companions impose on the relay: best-effort delivery with no acknowledgement guarantee (Relay §6), and no sender designator or reply path implied by receipt (Architecture §3.1). A relayed payload is handed to the receiver with no obligation to identify its originator; a client requiring origin or a reply path constructs it within the `Payload`, above this interface (Architecture §3.2).
 
@@ -132,5 +132,5 @@ Authentication of the caller, admission control, and rejection of spoofed design
 
 ### 7.2. Informative References
 
-- GRS RPC Pull Profile (`rpc-pull-profile.md`): specializes this core for request/response, client-initiated-only transports. It layers on the GRS RPC Pull Session Layer (`rpc-pull-session.md`), which synthesizes the session a connectionless transport does not natively provide.
-- GRS RPC Pushable Profile (`rpc-push-profile.md`): specializes this core for full-duplex, session-oriented transports, where the transport connection is itself the session.
+- GRS RPC Pull Profile (`pull/rpc-pull-profile.md`): specializes this core for request/response, client-initiated-only transports. It layers on the GRS RPC Pull Session Layer (`pull/rpc-pull-session.md`), which synthesizes the session a connectionless transport does not natively provide.
+- GRS RPC Pushable Profile (`push/rpc-push-profile.md`): specializes this core for full-duplex, session-oriented transports, where the transport connection is itself the session.

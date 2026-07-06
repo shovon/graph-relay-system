@@ -89,4 +89,4 @@ This binding inherits the considerations of Core §6 and Architecture §8 and ad
 ### 7.2. Informative References
 
 - GRS Designator String Representation (`designator-string.md`): the companion representation binding this one mirrors, fixing the `Designator` type as a string and making it opaque to the client as this binding makes the `Payload` opaque to the server.
-- GRS RPC Pull Profile (`../interface-profiles/rpc-pull-profile.md`) and GRS RPC Pushable Profile (`../interface-profiles/rpc-push-profile.md`): the profiles whose `Send`, `Deliver`, and `Receive` operations carry payloads in this representation.
+- GRS RPC Pull Profile (`../interface-profiles/pull/rpc-pull-profile.md`) and GRS RPC Pushable Profile (`../interface-profiles/push/rpc-push-profile.md`): the profiles whose `Send`, `Deliver`, and `Receive` operations carry payloads in this representation.

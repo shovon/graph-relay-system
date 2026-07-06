@@ -6,7 +6,7 @@ This document is a companion to the _GRS WebSocket Transport Binding_ (`websocke
 
 Its whole content reduces to one rule and its consequences: **the connection URL identifies the graph.** The URL is at once where a client connects (a locator) and an opaque identifier for the graph it joins (a natural key) — the same duality a linked-data system gives an actor IRI, which both dereferences and names. From that one rule follow a server's freedoms (it owns the URL's shape and need not encode any meaning in it), a client's single hard constraint (it MUST treat the URL as opaque), and one security decision a deployment MUST make explicitly (what a previously-unknown URL does).
 
-A server that hosts exactly one graph needs little of this document: it exposes one URL and is done. The document earns its length only for a server that hosts many. It is normative for implementations of the GRS WebSocket Transport Binding that expose more than one graph, and its client-side opacity rule (Section 4.2) is normative for **every** client. Section references of the form (Transport §N) point into `websocket-transport-binding.md`; (Binding §N) into `oneway-json-array-binding.md`; (Designator §N) into `../data-shapes/designator-string.md`; (Push §N) into `../interface-profiles/rpc-push-profile.md`; (Architecture §N) into `../../architecture.md`. The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in RFC 2119.
+A server that hosts exactly one graph needs little of this document: it exposes one URL and is done. The document earns its length only for a server that hosts many. It is normative for implementations of the GRS WebSocket Transport Binding that expose more than one graph, and its client-side opacity rule (Section 4.2) is normative for **every** client. Section references of the form (Transport §N) point into `websocket-transport-binding.md`; (Binding §N) into `oneway-binding.md`; (Designator §N) into `../../data-shapes/designator-string.md`; (Push §N) into `../../interface-profiles/push/rpc-push-profile.md`; (Architecture §N) into `../../../architecture.md`. The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in RFC 2119.
 
 ## Table of Contents
 
@@ -138,11 +138,11 @@ This document inherits the considerations of the transport binding (Transport §
 - RFC 3986: Uniform Resource Identifier (URI): Generic Syntax.
 - RFC 6455: The WebSocket Protocol.
 - GRS WebSocket Transport Binding (`websocket-transport-binding.md`).
-- GRS One-Way Pushable JSON-Array Binding (`oneway-json-array-binding.md`).
-- Graph Relay System (GRS) Protocol (`../../architecture.md`).
+- GRS One-Way Pushable JSON-Array Binding (`oneway-binding.md`).
+- Graph Relay System (GRS) Protocol (`../../../architecture.md`).
 
 ### 11.2. Informative References
 
 - RFC 8615: Well-Known Uniform Resource Identifiers (URIs).
-- GRS Designator String Representation (`../data-shapes/designator-string.md`).
-- GRS RPC Pushable Profile (`../interface-profiles/rpc-push-profile.md`).
+- GRS Designator String Representation (`../../data-shapes/designator-string.md`).
+- GRS RPC Pushable Profile (`../../interface-profiles/push/rpc-push-profile.md`).

@@ -2,11 +2,11 @@
 
 ## Status of This Memo
 
-This document is a companion to the _GRS RPC Pushable Profile_ (`../interface-profiles/rpc-push-profile.md`). Where that profile defines the operations a full-duplex, session-oriented transport carries — `Send`, `Deliver`, `NeighborhoodUpdate` — each in isolation, this document **choreographs** them: it shows how they compose, over time, into the end-to-end flows a participant actually observes (joining, sending, receiving, neighborhood change, departure).
+This document is a companion to the _GRS RPC Pushable Profile_ (`../interface-profiles/push/rpc-push-profile.md`). Where that profile defines the operations a full-duplex, session-oriented transport carries — `Send`, `Deliver`, `NeighborhoodUpdate` — each in isolation, this document **choreographs** them: it shows how they compose, over time, into the end-to-end flows a participant actually observes (joining, sending, receiving, neighborhood change, departure).
 
 It adds exactly one thing the operation definitions do not: **temporal sequencing** — what happens, in what order, and which parties observe it. It deliberately restates none of the relay semantics, designator rules, or best-effort guarantees fixed elsewhere; it only sequences behavior those documents already mandate, and points back to them.
 
-This document is therefore **largely non-normative**: the flows it draws are illustrations of behavior required by the profile and its companions. It is normative only where it imposes an ordering constraint not already implied, and such points are called out with RFC 2119 keywords in place. Section references of the form (Push §N) point into `../interface-profiles/rpc-push-profile.md`; (Core §N) into `../interface-profiles/rpc-interface.md`; (Relay §N) into `../../relay-and-neighborhood-semantics.md`; (Architecture §N) into `../../architecture.md`.
+This document is therefore **largely non-normative**: the flows it draws are illustrations of behavior required by the profile and its companions. It is normative only where it imposes an ordering constraint not already implied, and such points are called out with RFC 2119 keywords in place. Section references of the form (Push §N) point into `../interface-profiles/push/rpc-push-profile.md`; (Core §N) into `../interface-profiles/rpc-interface.md`; (Relay §N) into `../../relay-and-neighborhood-semantics.md`; (Architecture §N) into `../../architecture.md`.
 
 A parallel choreography for the request/response case is anticipated as a companion (`pull-based-choreography.md`); the differences are exactly those the Pull Profile introduces — a polled inbox in place of `Deliver`, and a polled `GetNeighborhood` in place of `NeighborhoodUpdate` — and are out of scope here.
 
@@ -151,11 +151,11 @@ Messages buffered for a departed node need not be preserved (Relay §7), and the
 ### 9.1. Normative References
 
 - RFC 2119: Key words for use in RFCs to Indicate Requirement Levels.
-- GRS RPC Pushable Profile (`../interface-profiles/rpc-push-profile.md`).
+- GRS RPC Pushable Profile (`../interface-profiles/push/rpc-push-profile.md`).
 - GRS RPC Common Core (`../interface-profiles/rpc-interface.md`).
 - GRS Relay and Neighborhood Semantics (`../../relay-and-neighborhood-semantics.md`).
 - Graph Relay System (GRS) Protocol (`../../architecture.md`).
 
 ### 9.2. Informative References
 
-- GRS RPC Pull Profile (`../interface-profiles/rpc-pull-profile.md`): the request/response companion whose choreography (anticipated as `pull-based-choreography.md`) would differ by substituting a polled inbox and polled neighborhood query for the two server pushes used here.
+- GRS RPC Pull Profile (`../interface-profiles/pull/rpc-pull-profile.md`): the request/response companion whose choreography (anticipated as `pull-based-choreography.md`) would differ by substituting a polled inbox and polled neighborhood query for the two server pushes used here.

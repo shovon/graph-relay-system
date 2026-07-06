@@ -104,4 +104,4 @@ Clients requiring end-to-end guarantees — reliable delivery, ordering, acknowl
 
 ### Informative References
 
-- GRS RPC Common Core (`conformance/interface-profiles/rpc-interface.md`): maps the state-availability and relay semantics fixed here onto abstract operations, specialized by the Pull (`conformance/interface-profiles/rpc-pull-profile.md`) and Pushable (`conformance/interface-profiles/rpc-push-profile.md`) transport profiles.
+- GRS RPC Common Core (`conformance/interface-profiles/rpc-interface.md`): maps the state-availability and relay semantics fixed here onto abstract operations, specialized by the Pull (`conformance/interface-profiles/pull/rpc-pull-profile.md`) and Pushable (`conformance/interface-profiles/push/rpc-push-profile.md`) transport profiles.

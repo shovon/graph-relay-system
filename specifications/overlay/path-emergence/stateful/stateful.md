@@ -14,7 +14,7 @@ Two consequences drive every design decision below, so they are stated up front:
 1. **Trails are forward-only.** A trail is an accumulated list of `(node ID, local out-designator)` pairs. Each designator is interpreted only by the node that owns it, so the trail works as a forward source route _in the direction it was built_ — and only that direction. It cannot be walked backward: a node has no edge to, and no name for, the neighbor that sent to it.
 2. **Every reply is a second routing problem.** Because trails are not reversible, "sending something back to the origin" is not a return hop. It is a from-scratch delivery to the origin's node ID, with the same cost profile as the original find. This is the single most important thing to budget for, and it is made explicit everywhere it occurs below rather than hidden behind phrases like "the regular channel."
 
-Cycle detection, flood termination, and the heuristic applied when a cycle is detected are handled in the companion cycle-detection memo. Wherever this document relies on duplicate-suppression or loop-checking, it defers to that memo and notes the plug-in point.
+Flood termination and duplicate suppression are handled in the companion [flood-safety memo](../cycle-detection.md). Route loops need no handling: a signed chain does not concatenate, so a discovered route is one flood's single chain and cannot revisit a node ([flood safety](../cycle-detection.md) §3).
 
 ---
 
@@ -24,9 +24,9 @@ An originating node wants to deliver cargo to a target node ID but does not know
 
 It floods the cargo to all of its out-neighbors. To each copy it appends a trail entry: its own node ID paired with the out-edge designator used for that specific neighbor. Every intermediate node does the same as it re-floods, so the trail grows one `(node ID, designator)` pair per hop.
 
-Flood termination (a discovery ID that each node remembers-and-drops on repeat, plus a hop/TTL backstop) is required for correctness on a cyclic graph and is specified in the cycle-detection memo. Without it the flood does not die.
+Flood termination (a discovery ID that each node remembers-and-drops on repeat, plus a hop-bound backstop `H_max` — a node-local ceiling on trail length, default 64) is required for correctness on a cyclic graph and is specified in the [flood-safety memo](../cycle-detection.md), where `H_max` is committed. Without it the flood does not die.
 
-Part-way through the flood, some node recognizes a trail _to_ the intended recipient — either it is the recipient, or it holds cached forwarding state for that destination. Call this the **answering node**.
+Part-way through the flood, the copy reaches the **target itself** — the intended recipient. Call it the **answering node**. A non-target node that merely holds forwarding state toward the target is _not_ an answering node: a signed chain does not concatenate, so it cannot hand back a verified route it did not itself traverse. At most it narrows its own fan-out toward the target (the install caveats below).
 
 ### Returning the trail to the origin
 
@@ -44,8 +44,8 @@ When the origin receives a returned trail, it records the target node ID against
 Caveats on install:
 
 - **Install is itself forwarding and can break mid-way.** If a hop on the install path has gone stale, apply the Broken Trail logic (below) recursively, and be prepared for a partially-installed path.
-- **Cache-answered trails are concatenations.** When the answering node is a cached intermediate rather than the target itself, the delivered trail is `(freshly-found origin → answerer)` + `(answerer's older cached answerer → target)`. The older suffix may be stale, and the concatenation may revisit a node already on the new prefix. Loop-checking the concatenated node-ID list, and revalidating stale suffixes, is delegated to the cycle-detection memo; this is the point at which it must be invoked.
-- **Multiple answers race.** Several nodes may recognize the target, so the origin may receive several trails. First-arrival (≈ lowest latency) is a fine default; keeping a runner-up as a backup route enables faster repair later.
+- **Only the target answers; a cache cannot.** A non-target node holding forwarding state toward the target still cannot hand back a verified route to it: a signed chain does not concatenate ([trail wire format](../trail-wire-format.md) §5), so the fresh `(origin → this node)` chain and the node's onward knowledge are not one route and cannot be welded into one. As in the stateless discipline, such a node floods onward — narrowing its fan-out to a recognized out-neighbor if it can — rather than answering; the route is complete only when a flood reaches the target itself.
+- **Multiple answers race.** The target may be reached by several flood paths, so the origin may receive several distinct routes. First-arrival (≈ lowest latency) is a fine default; keeping a runner-up as a backup route enables faster repair later.
 
 ---
 
@@ -99,4 +99,4 @@ Whether a broken trail should notify the origin is a cost question, because — 
 - **Destination-side dedup.** Flooding (and retries) can deliver the same cargo to the target multiple times. Deduplicate at the _destination_ on `(origin ID, message sequence)`, not only at relays.
 - **Node ID generation.** With no coordinator, derive node IDs to be probabilistically unique without coordination — e.g. a sufficiently wide random value or a hash of a per-node public key.
 - **Trust.** Source identity is only whatever the packet claims. A malicious node can forge an origin or poison a path-install. Acceptable on a trusted network; if the network is not trusted, authentication of trail entries and installs is required.
-- **Termination and loops.** Flood termination and all cycle/loop handling (including the concatenation loop-check noted under Install) live in the cycle-detection memo and are assumed available wherever referenced here.
+- **Termination and loops.** Flood termination and all cycle handling live in the [flood-safety memo](../cycle-detection.md) and are assumed available wherever referenced here. There is no route loop-check to run: a signed chain does not concatenate, so every discovered route is one flood's single chain and cannot revisit a node.

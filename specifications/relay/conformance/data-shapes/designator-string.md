@@ -92,4 +92,4 @@ This binding inherits the considerations of Core §6 and Architecture §8 and ad
 ### 8.2. Informative References
 
 - RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format.
-- GRS RPC Pull Profile (`../interface-profiles/rpc-pull-profile.md`) and GRS RPC Pushable Profile (`../interface-profiles/rpc-push-profile.md`): the profiles whose `Send` and neighborhood-state operations carry designators in this representation.
+- GRS RPC Pull Profile (`../interface-profiles/pull/rpc-pull-profile.md`) and GRS RPC Pushable Profile (`../interface-profiles/push/rpc-push-profile.md`): the profiles whose `Send` and neighborhood-state operations carry designators in this representation.
